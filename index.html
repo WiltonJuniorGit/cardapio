@@ -1,0 +1,626 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CEMJOS - Cardápio Escolar Semanal</title>
+  
+  <!-- Google Fonts: Plus Jakarta Sans e Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet" />
+  
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            display: ['Plus Jakarta Sans', 'sans-serif'],
+          },
+          colors: {
+            cemjos: {
+              navy: '#0F2A56',
+              royal: '#1D4ED8',
+              red: '#DC2626',
+              crimson: '#EF4444',
+              light: '#F8FAFC',
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    /* Estilos de impressão otimizados */
+    @media print {
+      .no-print {
+        display: none !important;
+      }
+      body {
+        background-color: #ffffff !important;
+      }
+      .print-shadow-none {
+        box-shadow: none !important;
+        border: 1px solid #cbd5e1 !important;
+      }
+    }
+  </style>
+</head>
+<body class="bg-[#F8FAFC] text-slate-800 antialiased min-h-screen flex flex-col selection:bg-[#DC2626] selection:text-white">
+
+  <!-- Cabeçalho Institucional -->
+  <header class="bg-gradient-to-r from-[#0F2A56] via-[#1D4ED8] to-[#0F2A56] text-white shadow-lg relative overflow-hidden">
+    <!-- Detalhe decorativo em vermelho institucional -->
+    <div class="h-1.5 w-full bg-gradient-to-r from-[#DC2626] via-[#EF4444] to-[#DC2626]"></div>
+
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10 relative z-10">
+      <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
+        
+        <!-- Identidade da Escola -->
+        <div class="flex items-center gap-4">
+          <div class="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-white/10 backdrop-blur-md border border-white/20 flex items-center justify-center shadow-inner shrink-0">
+            <!-- Brasão/Ícone Institucional SVG -->
+            <svg class="w-8 h-8 sm:w-9 sm:h-9 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M22 10v6M2 10l10-5 10 5-10 5z"/>
+              <path d="M6 12v5c3 3 9 3 12 0v-5"/>
+            </svg>
+          </div>
+          <div>
+            <div class="inline-flex items-center gap-2 px-2.5 py-0.5 rounded-full bg-[#DC2626] text-white text-xs font-bold tracking-wider uppercase mb-1.5 shadow-sm">
+              Alimentação Escolar
+            </div>
+            <h1 class="font-display text-3xl sm:text-4xl font-extrabold tracking-tight text-white">
+              CEMJOS
+            </h1>
+            <p class="text-blue-100 text-sm sm:text-base font-medium">
+              Cardápio Escolar Semanal
+            </p>
+          </div>
+        </div>
+
+        <!-- Cartão de Status do Dia Atual -->
+        <div class="bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl p-4 sm:px-5 sm:py-4 flex items-center gap-3.5 max-w-md">
+          <div class="w-10 h-10 rounded-xl bg-[#EF4444] flex items-center justify-center shrink-0 shadow-md">
+            <svg class="w-5 h-5 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+              <line x1="16" y1="2" x2="16" y2="6"></line>
+              <line x1="8" y1="2" x2="8" y2="6"></line>
+              <line x1="3" y1="10" x2="21" y2="10"></line>
+            </svg>
+          </div>
+          <div>
+            <p id="current-date-label" class="text-xs text-blue-200 font-medium uppercase tracking-wider">
+              Carregando data...
+            </p>
+            <p id="today-highlight-text" class="text-sm sm:text-base font-bold text-white mt-0.5">
+              Verificando prato do dia...
+            </p>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </header>
+
+  <!-- Barra de Controles, Filtros e Ações -->
+  <main class="flex-grow max-w-6xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    
+    <!-- Painel de Navegação e Ações -->
+    <section aria-label="Controles do cardápio" class="no-print bg-white rounded-2xl shadow-sm border border-slate-200/80 p-3 sm:p-4 mb-8 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+      
+      <!-- Abas de Filtro por Dia -->
+      <div id="day-filters" class="flex items-center gap-1.5 overflow-x-auto pb-1 lg:pb-0 scrollbar-none" role="tablist" aria-label="Filtrar por dia da semana">
+        <!-- Botões injetados via JavaScript -->
+      </div>
+
+      <!-- Botões de Visualização e Impressão -->
+      <div class="flex items-center justify-between sm:justify-end gap-2 border-t lg:border-t-0 pt-3 lg:pt-0 border-slate-100">
+        
+        <!-- Alternador Grade / Lista -->
+        <div class="inline-flex rounded-xl bg-slate-100 p-1" role="group" aria-label="Modo de exibição">
+          <button type="button" id="btn-view-grid" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs sm:text-sm font-semibold transition-all bg-white text-[#0F2A56] shadow-sm">
+            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="3" width="7" height="7"></rect>
+              <rect x="14" y="3" width="7" height="7"></rect>
+              <rect x="14" y="14" width="7" height="7"></rect>
+              <rect x="3" y="14" width="7" height="7"></rect>
+            </svg>
+            <span>Grade</span>
+          </button>
+          <button type="button" id="btn-view-list" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs sm:text-sm font-semibold transition-all text-slate-600 hover:text-[#0F2A56]">
+            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="8" y1="6" x2="21" y2="6"></line>
+              <line x1="8" y1="12" x2="21" y2="12"></line>
+              <line x1="8" y1="18" x2="21" y2="18"></line>
+              <line x1="3" y1="6" x2="3.01" y2="6"></line>
+              <line x1="3" y1="12" x2="3.01" y2="12"></line>
+              <line x1="3" y1="18" x2="3.01" y2="18"></line>
+            </svg>
+            <span>Lista</span>
+          </button>
+        </div>
+
+        <!-- Botão Imprimir / Salvar PDF -->
+        <button type="button" id="btn-print" class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-[#0F2A56] hover:bg-[#1D4ED8] text-white text-xs sm:text-sm font-semibold transition-colors shadow-sm cursor-pointer">
+          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="6 9 6 2 18 2 18 9"></polyline>
+            <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path>
+            <rect x="6" y="14" width="12" height="8"></rect>
+          </svg>
+          <span>Imprimir</span>
+        </button>
+
+      </div>
+    </section>
+
+    <!-- Aviso de Fim de Semana (exibido apenas sábado/domingo) -->
+    <div id="weekend-banner" class="hidden no-print mb-6 rounded-2xl bg-blue-50 border border-blue-200 p-4 flex items-center gap-3 text-[#0F2A56]">
+      <div class="w-9 h-9 rounded-xl bg-[#1D4ED8] text-white flex items-center justify-center shrink-0">
+        <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"></circle>
+          <line x1="12" y1="16" x2="12" y2="12"></line>
+          <line x1="12" y1="8" x2="12.01" y2="8"></line>
+        </svg>
+      </div>
+      <p class="text-sm font-medium">
+        Hoje é fim de semana! Destacamos automaticamente o cardápio de <strong class="font-bold text-[#DC2626]">Segunda-feira</strong> para o início das aulas.
+      </p>
+    </div>
+
+    <!-- Container dos Cards do Cardápio -->
+    <section id="menu-container" aria-label="Refeições da semana" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <!-- Cards gerados dinamicamente via JavaScript -->
+    </section>
+
+    <!-- Nota Nutricional Institucional -->
+    <aside class="mt-10 bg-white rounded-2xl border border-slate-200/80 p-5 sm:p-6 shadow-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+      <div class="flex items-start gap-3.5">
+        <div class="w-10 h-10 rounded-xl bg-red-50 text-[#DC2626] flex items-center justify-center shrink-0 mt-0.5">
+          <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+          </svg>
+        </div>
+        <div>
+          <h2 class="font-display font-bold text-[#0F2A56] text-base">Compromisso com a Nutrição Escolar</h2>
+          <p class="text-sm text-slate-600 mt-1">
+            Todas as refeições do CEMJOS são preparadas diariamente com ingredientes selecionados, balanceamento nutricional e acompanhamento rigoroso de higiene.
+          </p>
+        </div>
+      </div>
+      <div class="text-xs font-semibold text-slate-500 bg-slate-100 px-3 py-1.5 rounded-lg shrink-0">
+        Sujeito a alterações conforme safra
+      </div>
+    </aside>
+
+  </main>
+
+  <!-- Rodapé -->
+  <footer class="bg-[#0F2A56] text-blue-200 py-6 mt-12 border-t-4 border-[#DC2626]">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs sm:text-sm">
+      <p class="font-semibold text-white">CEMJOS — Centro de Ensino</p>
+      <p>Cardápio Escolar Semanal • Alimentação Saudável</p>
+    </div>
+  </footer>
+
+  <!-- Toast de Feedback (substitui qualquer alert) -->
+  <div id="toast-notification" class="fixed bottom-5 right-5 z-50 transform translate-y-20 opacity-0 transition-all duration-300 pointer-events-none bg-[#0F2A56] text-white px-4 py-3 rounded-xl shadow-xl border-l-4 border-[#EF4444] flex items-center gap-2.5 text-sm font-medium">
+    <svg class="w-5 h-5 text-[#EF4444]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <polyline points="20 6 9 17 4 12"></polyline>
+    </svg>
+    <span id="toast-message">Ação concluída</span>
+  </div>
+
+  <script>
+    /**
+     * Dados estruturados do cardápio semanal da escola CEMJOS
+     * dayIndex corresponde ao retorno de Date.prototype.getDay() (1 = Segunda ... 5 = Sexta)
+     */
+    const MENU_DATA = [
+      {
+        id: 'seg',
+        dayIndex: 1,
+        shortDay: 'SEG',
+        fullDay: 'Segunda-feira',
+        dish: 'Bisteca',
+        category: 'Proteína Grelhada',
+        sides: ['Arroz branco soltinho', 'Feijão carioca temperado', 'Salada verde fresquinha', 'Suco natural da fruta'],
+        nutritionNote: 'Rica em proteínas e ferro para iniciar a semana com energia.',
+        calories: '~540 kcal',
+        accentColor: 'blue',
+        svgIcon: `
+          <svg class="w-7 h-7" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M19.5 12.5c0 4.14-3.8 7.5-8.5 7.5-3.4 0-6.5-1.8-7.5-4.5-.8-2.2.3-4.8 2.2-6.3C7.8 7.5 10.5 5 14 5c3.2 0 5.5 3.1 5.5 7.5z"/>
+            <circle cx="14.5" cy="10.5" r="1.5"/>
+            <path d="M7 14l4-3M10 16l4-3"/>
+          </svg>
+        `
+      },
+      {
+        id: 'ter',
+        dayIndex: 2,
+        shortDay: 'TER',
+        fullDay: 'Terça-feira',
+        dish: 'Cozidão',
+        category: 'Prato Tradicional',
+        sides: ['Arroz branco', 'Caldo encorpado com legumes', 'Pirão tradicional', 'Farofa crocante'],
+        nutritionNote: 'Combinação nutritiva de carnes e legumes cozidos lentamente.',
+        calories: '~580 kcal',
+        accentColor: 'red',
+        svgIcon: `
+          <svg class="w-7 h-7" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 11h18v2a8 8 0 0 1-8 8h-2a8 8 0 0 1-8-8v-2z"/>
+            <path d="M2 11h20"/>
+            <path d="M8 6c0-1 .8-1.5.8-2.5S8 2 8 2"/>
+            <path d="M12 6c0-1 .8-1.5.8-2.5S12 2 12 2"/>
+            <path d="M16 6c0-1 .8-1.5.8-2.5S16 2 16 2"/>
+          </svg>
+        `
+      },
+      {
+        id: 'qua',
+        dayIndex: 3,
+        shortDay: 'QUA',
+        fullDay: 'Quarta-feira',
+        dish: 'Frango Cozido',
+        category: 'Refeição Leve',
+        sides: ['Arroz temperado', 'Feijão macassar', 'Batata e cenoura no molho', 'Salada de tomate e pepino'],
+        nutritionNote: 'Proteína magra de fácil digestão com vegetais ricos em vitaminas.',
+        calories: '~510 kcal',
+        accentColor: 'blue',
+        svgIcon: `
+          <svg class="w-7 h-7" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M15.4 15.63a7.875 6 135 1 1 6.23-6.23 4.5 3.43 135 0 0-6.23 6.23"/>
+            <path d="m8.29 12.71-2.6 2.6a2.5 2.5 0 1 0-1.65 4.65A2.5 2.5 0 1 0 8.7 18.3l2.59-2.59"/>
+          </svg>
+        `
+      },
+      {
+        id: 'qui',
+        dayIndex: 4,
+        shortDay: 'QUI',
+        fullDay: 'Quinta-feira',
+        dish: 'Feijoada',
+        category: 'Clássico Brasileiro',
+        sides: ['Arroz branco soltinho', 'Couve refogada no alho', 'Farofa de mandioca', 'Laranja em rodelas'],
+        nutritionNote: 'Fonte de ferro, fibras e vitamina C da laranja para melhor absorção.',
+        calories: '~640 kcal',
+        accentColor: 'red',
+        svgIcon: `
+          <svg class="w-7 h-7" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M4 10h16v3a7 7 0 0 1-7 7h-2a7 7 0 0 1-7-7v-3z"/>
+            <path d="M2 10h20"/>
+            <circle cx="9" cy="14" r="1"/>
+            <circle cx="14" cy="15" r="1"/>
+            <path d="M9 6c.5-1 .5-2 0-3"/>
+            <path d="M15 6c.5-1 .5-2 0-3"/>
+          </svg>
+        `
+      },
+      {
+        id: 'sex',
+        dayIndex: 5,
+        shortDay: 'SEX',
+        fullDay: 'Sexta-feira',
+        dish: 'Frango Assado',
+        category: 'Especial de Sexta',
+        sides: ['Arroz à grega ou branco', 'Feijão carioca', 'Macarronada / Salada colorida', 'Suco natural'],
+        nutritionNote: 'Assado no forno com ervas naturais, crocante por fora e suculento.',
+        calories: '~530 kcal',
+        accentColor: 'blue',
+        svgIcon: `
+          <svg class="w-7 h-7" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 3c-4.5 0-8 3.2-8 7.5 0 2.8 1.5 5.2 4 6.5h8c2.5-1.3 4-3.7 4-6.5C20 6.2 16.5 3 12 3z"/>
+            <path d="M4 20h16"/>
+            <path d="M9 10c1-1 2-1 3 0"/>
+            <path d="M13 10c1-1 2-1 3 0"/>
+          </svg>
+        `
+      }
+    ];
+
+    // Estado da aplicação
+    const state = {
+      selectedFilter: 'all', // 'all' ou id do dia ('seg', 'ter', 'qua', 'qui', 'sex')
+      viewMode: 'grid',      // 'grid' ou 'list'
+      highlightedDayIndex: 1 // Padrão Segunda-feira (1)
+    };
+
+    /**
+     * Identifica o dia da semana atual do usuário.
+     * Caso seja Sábado (6) ou Domingo (0), aplica fallback para Segunda-feira (1).
+     */
+    function detectCurrentSchoolDay() {
+      const now = new Date();
+      const rawDay = now.getDay(); // 0 = Dom, 1 = Seg ... 6 = Sáb
+      const isWeekend = rawDay === 0 || rawDay === 6;
+      const targetDayIndex = isWeekend ? 1 : rawDay;
+
+      state.highlightedDayIndex = targetDayIndex;
+
+      // Atualiza texto da data no cabeçalho
+      const dateFormatter = new Intl.DateTimeFormat('pt-BR', {
+        weekday: 'long',
+        day: '2-digit',
+        month: 'long'
+      });
+      const formattedDate = dateFormatter.format(now);
+      document.getElementById('current-date-label').textContent = formattedDate;
+
+      // Busca o prato correspondente ao dia destacado
+      const activeItem = MENU_DATA.find(item => item.dayIndex === targetDayIndex) || MENU_DATA[0];
+      const prefixLabel = isWeekend ? 'Próxima Segunda:' : 'Prato de Hoje:';
+      document.getElementById('today-highlight-text').textContent = `${prefixLabel} ${activeItem.dish}`;
+
+      // Exibe banner informativo se for fim de semana
+      const weekendBanner = document.getElementById('weekend-banner');
+      if (isWeekend) {
+        weekendBanner.classList.remove('hidden');
+      } else {
+        weekendBanner.classList.add('hidden');
+      }
+    }
+
+    /**
+     * Renderiza os botões de filtro rápido por dia da semana
+     */
+    function renderFilters() {
+      const filterContainer = document.getElementById('day-filters');
+      
+      const buttons = [
+        { id: 'all', label: 'Todos os dias' },
+        ...MENU_DATA.map(item => ({
+          id: item.id,
+          label: item.shortDay,
+          isToday: item.dayIndex === state.highlightedDayIndex
+        }))
+      ];
+
+      filterContainer.innerHTML = buttons.map(btn => {
+        const isActive = state.selectedFilter === btn.id;
+        const baseClasses = 'px-3.5 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all whitespace-nowrap flex items-center gap-1.5 cursor-pointer';
+        const activeClasses = isActive
+          ? 'bg-[#DC2626] text-white shadow-sm'
+          : 'bg-slate-100/80 text-slate-700 hover:bg-blue-50 hover:text-[#1D4ED8]';
+
+        const dotIndicator = btn.isToday
+          ? `<span class="w-2 h-2 rounded-full ${isActive ? 'bg-white' : 'bg-[#DC2626]'}" title="Dia em destaque"></span>`
+          : '';
+
+        return `
+          <button
+            type="button"
+            role="tab"
+            aria-selected="${isActive}"
+            data-filter="${btn.id}"
+            class="${baseClasses} ${activeClasses}"
+          >
+            ${dotIndicator}
+            <span>${btn.label}</span>
+          </button>
+        `;
+      }).join('');
+
+      // Adiciona eventos de clique nos filtros
+      filterContainer.querySelectorAll('button').forEach(button => {
+        button.addEventListener('click', () => {
+          state.selectedFilter = button.getAttribute('data-filter');
+          renderFilters();
+          renderMenuCards();
+        });
+      });
+    }
+
+    /**
+     * Renderiza os cards do cardápio conforme filtro e modo de exibição (Grade ou Lista)
+     */
+    function renderMenuCards() {
+      const container = document.getElementById('menu-container');
+      
+      // Filtra os itens
+      const filteredItems = state.selectedFilter === 'all'
+        ? MENU_DATA
+        : MENU_DATA.filter(item => item.id === state.selectedFilter);
+
+      // Ajusta classes do grid container conforme visualização
+      if (state.viewMode === 'list') {
+        container.className = 'flex flex-col gap-4';
+      } else if (filteredItems.length === 1) {
+        container.className = 'grid grid-cols-1 max-w-2xl mx-auto gap-6';
+      } else {
+        container.className = 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6';
+      }
+
+      container.innerHTML = filteredItems.map(item => {
+        const isHighlighted = item.dayIndex === state.highlightedDayIndex;
+        const isWeekend = [0, 6].includes(new Date().getDay());
+        const badgeLabel = isWeekend ? 'Destaque • Segunda' : 'Hoje';
+
+        // Cores temáticas alternadas entre Azul Royal e Vermelho Vibrante
+        const isRedTheme = item.accentColor === 'red';
+        const headerBg = isHighlighted
+          ? 'bg-gradient-to-r from-[#DC2626] to-[#EF4444] text-white'
+          : (isRedTheme ? 'bg-[#0F2A56] text-white' : 'bg-[#1D4ED8] text-white');
+
+        const cardBorder = isHighlighted
+          ? 'ring-2 ring-[#DC2626] border-[#DC2626] shadow-lg shadow-red-900/10'
+          : 'border-slate-200/90 shadow-sm hover:shadow-md hover:border-blue-300';
+
+        const iconBoxStyle = isHighlighted
+          ? 'bg-red-50 text-[#DC2626] border-red-200'
+          : (isRedTheme ? 'bg-red-50 text-[#DC2626] border-red-100' : 'bg-blue-50 text-[#1D4ED8] border-blue-100');
+
+        // Layout em Lista Compacta
+        if (state.viewMode === 'list') {
+          return `
+            <article class="print-shadow-none bg-white rounded-2xl border ${cardBorder} transition-all duration-200 overflow-hidden flex flex-col sm:flex-row items-stretch">
+              <div class="${headerBg} px-5 py-4 sm:w-48 flex sm:flex-col justify-between sm:justify-center items-center sm:items-start shrink-0">
+                <div>
+                  <span class="text-xs font-extrabold uppercase tracking-widest opacity-85 block">${item.shortDay}</span>
+                  <h3 class="font-display font-bold text-lg leading-tight">${item.fullDay}</h3>
+                </div>
+                ${isHighlighted ? `
+                  <span class="mt-0 sm:mt-2 inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-extrabold bg-white text-[#DC2626] shadow-sm">
+                    ★ ${badgeLabel}
+                  </span>
+                ` : ''}
+              </div>
+
+              <div class="p-5 flex-grow flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div class="flex items-start sm:items-center gap-4">
+                  <div class="w-12 h-12 rounded-xl border ${iconBoxStyle} flex items-center justify-center shrink-0">
+                    ${item.svgIcon}
+                  </div>
+                  <div>
+                    <div class="flex flex-wrap items-center gap-2">
+                      <h4 class="font-display text-xl font-extrabold text-[#0F2A56]">${item.dish}</h4>
+                      <span class="text-xs font-semibold px-2.5 py-0.5 rounded-md bg-slate-100 text-slate-600">${item.category}</span>
+                    </div>
+                    <p class="text-sm text-slate-600 mt-1">
+                      <strong class="text-slate-700 font-semibold">Acompanhamentos:</strong> ${item.sides.join(' • ')}
+                    </p>
+                  </div>
+                </div>
+
+                <div class="text-xs font-bold text-[#1D4ED8] bg-blue-50 px-3 py-1.5 rounded-lg self-start sm:self-center shrink-0">
+                  ${item.calories}
+                </div>
+              </div>
+            </article>
+          `;
+        }
+
+        // Layout Padrão em Grade (Cards)
+        return `
+          <article class="print-shadow-none bg-white rounded-2xl border ${cardBorder} transition-all duration-200 flex flex-col overflow-hidden group">
+            <!-- Topo do Card -->
+            <div class="${headerBg} px-5 py-3.5 flex items-center justify-between">
+              <div class="flex items-center gap-2">
+                <span class="px-2 py-0.5 rounded-md bg-white/20 text-white text-xs font-extrabold tracking-wider">
+                  ${item.shortDay}
+                </span>
+                <h3 class="font-display font-bold text-base tracking-tight">
+                  ${item.fullDay}
+                </h3>
+              </div>
+
+              ${isHighlighted ? `
+                <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-extrabold bg-white text-[#DC2626] shadow-sm">
+                  <span class="w-1.5 h-1.5 rounded-full bg-[#DC2626] animate-pulse"></span>
+                  ${badgeLabel}
+                </span>
+              ` : `
+                <span class="text-xs font-medium text-white/80">${item.calories}</span>
+              `}
+            </div>
+
+            <!-- Corpo do Card -->
+            <div class="p-5 sm:p-6 flex-grow flex flex-col justify-between">
+              <div>
+                <!-- Prato Principal e Ícone -->
+                <div class="flex items-start justify-between gap-3 mb-4">
+                  <div>
+                    <span class="text-xs font-bold uppercase tracking-wider ${isHighlighted ? 'text-[#DC2626]' : 'text-[#1D4ED8]'}">
+                      ${item.category}
+                    </span>
+                    <h4 class="font-display text-2xl font-extrabold text-[#0F2A56] mt-0.5 group-hover:text-[#1D4ED8] transition-colors">
+                      ${item.dish}
+                    </h4>
+                  </div>
+                  <div class="w-13 h-13 p-3 rounded-2xl border ${iconBoxStyle} flex items-center justify-center shrink-0 transition-transform group-hover:scale-105">
+                    ${item.svgIcon}
+                  </div>
+                </div>
+
+                <!-- Lista de Acompanhamentos -->
+                <div class="border-t border-slate-100 pt-4 mt-2">
+                  <p class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-2.5">
+                    Acompanhamentos do Dia
+                  </p>
+                  <ul class="space-y-1.5">
+                    ${item.sides.map(side => `
+                      <li class="flex items-center gap-2 text-sm text-slate-700">
+                        <span class="w-1.5 h-1.5 rounded-full ${isHighlighted ? 'bg-[#DC2626]' : 'bg-[#1D4ED8]'} shrink-0"></span>
+                        <span>${side}</span>
+                      </li>
+                    `).join('')}
+                  </ul>
+                </div>
+              </div>
+
+              <!-- Nota Nutricional -->
+              <div class="mt-5 pt-3.5 border-t border-slate-100 flex items-start gap-2 text-xs text-slate-500">
+                <svg class="w-4 h-4 text-[#1D4ED8] shrink-0 mt-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="12" cy="12" r="10"></circle>
+                  <line x1="12" y1="16" x2="12" y2="12"></line>
+                  <line x1="12" y1="8" x2="12.01" y2="8"></line>
+                </svg>
+                <span>${item.nutritionNote}</span>
+              </div>
+            </div>
+          </article>
+        `;
+      }).join('');
+    }
+
+    /**
+     * Exibe mensagem discreta de feedback (Toast)
+     */
+    function showToast(message) {
+      const toast = document.getElementById('toast-notification');
+      const msgEl = document.getElementById('toast-message');
+      msgEl.textContent = message;
+
+      toast.classList.remove('translate-y-20', 'opacity-0');
+      setTimeout(() => {
+        toast.classList.add('translate-y-20', 'opacity-0');
+      }, 2800);
+    }
+
+    /**
+     * Configura os listeners de alternância de visualização e impressão
+     */
+    function setupControls() {
+      const btnGrid = document.getElementById('btn-view-grid');
+      const btnList = document.getElementById('btn-view-list');
+      const btnPrint = document.getElementById('btn-print');
+
+      btnGrid.addEventListener('click', () => {
+        state.viewMode = 'grid';
+        btnGrid.className = 'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs sm:text-sm font-semibold transition-all bg-white text-[#0F2A56] shadow-sm cursor-pointer';
+        btnList.className = 'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs sm:text-sm font-semibold transition-all text-slate-600 hover:text-[#0F2A56] cursor-pointer';
+        renderMenuCards();
+      });
+
+      btnList.addEventListener('click', () => {
+        state.viewMode = 'list';
+        btnList.className = 'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs sm:text-sm font-semibold transition-all bg-white text-[#0F2A56] shadow-sm cursor-pointer';
+        btnGrid.className = 'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs sm:text-sm font-semibold transition-all text-slate-600 hover:text-[#0F2A56] cursor-pointer';
+        renderMenuCards();
+      });
+
+      btnPrint.addEventListener('click', () => {
+        showToast('Preparando cardápio do CEMJOS para impressão...');
+        setTimeout(() => {
+          window.print();
+        }, 350);
+      });
+    }
+
+    // Inicialização ao carregar o DOM
+    document.addEventListener('DOMContentLoaded', () => {
+      try {
+        detectCurrentSchoolDay();
+        renderFilters();
+        renderMenuCards();
+        setupControls();
+      } catch (error) {
+        console.error('Erro ao inicializar o cardápio CEMJOS:', error);
+      }
+    });
+  </script>
+</body>
+</html>
